@@ -1,19 +1,6 @@
 #!/usr/bin/env bash
 # create environment variables
 createEnv(){
-	sudo echo "
-		export SITE=davidessien.com
-		export GIT_REPO=https://github.com/andela/selene-ah-frontend.git
-		export SITES_AVAILABLE=/etc/nginx/sites-available
-		export SITES_ENABLED=/etc/nginx/sites-enabled
-		export SITES_ENABLED_CONFIG=/etc/nginx/sites-enabled/selene
-		export SITES_AVAILABLE_CONFIG=/etc/nginx/sites-available/selene
-		export REPOSITORY_FOLDER=selene-ah-frontend
-		export EMAIL=david.essien@andela.com
-		export GREEN='\033[0;32m'
-		export RED='\033[0;31m'
-	" > .env
-
 	# add enviroment variables to OS
 	source .env
 }
@@ -36,16 +23,15 @@ installNode(){
 # Clone the repository
 cloneRepository(){
 	output "Checking if repository exists..." $GREEN
-	if [ ! -d selene-ah-frontend ]
+	if [ ! -d $REPOSITORY_FOLDER ]
 		then
 			output "Cloning repository..." $GREEN
-			git clone -b aws-deploy https://github.com/andela/selene-ah-frontend.git
-		else
+			git clone -b $GIT_BRANCH $GIT_REPO
 			output "Repository already exists..." $RED
 			output "Removing repository..." $GREEN
-			sudo rm -r selene-ah-frontend
+			sudo rm -r $REPOSITORY_FOLDER
 			output "Cloning repository..." $GREEN
-			git clone -b aws-deploy https://github.com/andela/selene-ah-frontend.git
+			git clone -b $GIT_BRANCH $GIT_REPO
 	fi
 	output "Repository cloned successfully" $GREEN
 }
@@ -53,7 +39,7 @@ cloneRepository(){
 # Setup the project
 setupProject(){
 	output "installing node modules" $GREEN
-	cd selene-ah-frontend
+	cd $REPOSITORY_FOLDER
 	sudo npm install -y
 	sudo npm audit fix --force
 	sudo npm run build
@@ -99,8 +85,8 @@ setupNginx(){
 
 setupSSL(){
 	output "installing and setting up SSL" $GREEN
-	site=davidessien.com
-	email=david.essien@andela.com
+	site=$SITE
+	email=$EMAIL
 	sudo apt-get update -y
 
 	# Get and install the SSL certificate
@@ -110,7 +96,7 @@ setupSSL(){
 	sudo apt-get install python-certbot-nginx -y
 
 	# Configure the ngix proxy file to use the SSL certificate
-	sudo certbot --nginx -n --agree-tos --email $email --redirect --expand -d $site -d "www.$site"
+	sudo certbot --nginx -n --agree-tos --email $EMAIL --redirect --expand -d $SITE -d "www.$SITE"
 
 	output "successfuly setup SSL" $GREEN
 }
@@ -120,11 +106,11 @@ createAppService(){
 	output "Creating a service for the app..." $GREEN
 	sudo bash -c "cat > /etc/systemd/system/selene.service <<EOF
 		[Unit]
-		Description=Selene ah Service - Service to start the selene-ah frontend app
+		Description=Selene ah Service - Service to start the app
 		After=network.target
 
 		[Service]
-		ExecStart=/usr/bin/node /home/ubuntu/selene-ah-frontend/server.js
+		ExecStart=/usr/bin/node /home/ubuntu/$REPOSITORY_FOLDER/server.js
 		Restart=on-failure
 		Type=simple
 		User=ubuntu
