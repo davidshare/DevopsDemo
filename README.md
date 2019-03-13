@@ -1,5 +1,5 @@
 # DevopsDemo
-Simple scripts to deploy a react project to an AWS instance
+A simple bash script to deploy a react project to an AWS instance
 
 ## How to deploy
 * Create an AWS free tier account
