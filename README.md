@@ -3,7 +3,7 @@ A simple bash script to deploy a react project to an AWS instance
 
 ## How to deploy
 * Create an AWS free tier account
-* Create an AWS instance using the free tier resources and download your keypair file
+* Create an AWS ubuntu instance using the free tier resources and download your keypair file
 * SSH into the AWS instance you created and clone this repository in the root directory
 * Copy your keypair file into the root directory of the repository
 * Get a domain name (you can get a free one from www.freenom.com)
